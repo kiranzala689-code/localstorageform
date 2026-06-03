@@ -1,6 +1,6 @@
 import React from 'react'
-import Form from './Comp/Form'
-import Form2 from './Comp/Form2'
+// import Form from './Comp/Form'
+// import Form2 from './Comp/Form2'
 import Localstorageform from './Comp/Localstorageform'
 
 function App() {

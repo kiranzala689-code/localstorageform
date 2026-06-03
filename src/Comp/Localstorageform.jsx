@@ -1,258 +1,255 @@
 import React, { useState, useEffect } from "react";
 
 export default function Localstorageform() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    gender: "",
+    checkbox: false,
+    selection: "",
+  });
 
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        password: "",
-        phone: "",
-        gender: "",
-        checkbox: false,
-        selection: ""
+  const [savedData, setSavedData] = useState([]);
+  const [editData, seteditData] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 3;
+
+  useEffect(() => {
+    const oldData = JSON.parse(localStorage.getItem("users")) || [];
+    setSavedData(oldData);
+  }, []);
+
+  function handleChange(e) {
+    const { name, value, type, checked } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
     });
+  }
 
-    const [savedData, setSavedData] = useState([]);
-    const [editData, seteditData] = useState(null);
+  function handleSubmit(e) {
+    e.preventDefault();
 
-  
-    const [currentPage, setCurrentPage] = useState(1);
+    let updatedData;
 
-    const recordsPerPage = 3;
-
-    const lastIndex = currentPage * recordsPerPage;
-    const firstIndex = lastIndex - recordsPerPage;
-
-    const currentData = savedData.slice(firstIndex, lastIndex);
-
-    const totalPages = Math.ceil(savedData.length / recordsPerPage);
-
-    useEffect(() => {
-        const oldData = JSON.parse(localStorage.getItem("users")) || [];
-        setSavedData(oldData);
-    }, []);
-
-    function handleChange(e) {
-
-        const { name, value, type, checked } = e.target;
-
-        setFormData({
-            ...formData,
-            [name]: type === "checkbox" ? checked : value,
-        });
+    if (editData !== null) {
+      updatedData = [...savedData];
+      updatedData[editData] = formData;
+      seteditData(null);
+    } else {
+      updatedData = [...savedData, formData];
     }
 
-    function handleSubmit(e) {
+    setSavedData(updatedData);
+    localStorage.setItem("users", JSON.stringify(updatedData));
 
-        e.preventDefault();
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      gender: "",
+      checkbox: false,
+      selection: "",
+    });
+  }
 
-        let updatedData;
+  function Delete(id) {
+    const ans = savedData.filter((el, i) => i !== id);
 
-        if (editData != null) {
+    setSavedData(ans);
+    localStorage.setItem("users", JSON.stringify(ans));
 
-            updatedData = [...savedData];
-
-            updatedData[editData] = formData;
-
-            seteditData(null);
-
-        }
-
-        else {
-
-            updatedData = [...savedData, formData];
-        }
-
-        setSavedData(updatedData);
-
-        localStorage.setItem("users", JSON.stringify(updatedData));
-
-        setFormData({
-            name: "",
-            email: "",
-            password: "",
-            phone: "",
-            gender: "",
-            checkbox: false,
-            selection: ""
-        });
+    if (currentData.length === 1 && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
+  }
 
-    function Delete(id) {
+  function Edit(id) {
+    setFormData(savedData[id]);
+    seteditData(id);
+  }
 
-        let ans = savedData.filter((el, i) => i !== id);
-
-        setSavedData(ans);
-
-        localStorage.setItem("users", JSON.stringify(ans));
-
-        if (currentData.length === 1 && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    }
-
-    function Edit(id) {
-
-        setFormData(savedData[id]);
-
-        seteditData(id);
-    }
-
-    return (
-
-        <div className="container mt-5">
-
-            <div className="card p-4 shadow">
-
-                <h2 className="text-center mb-4">
-                    Registration Form
-                </h2>
-
-                <form onSubmit={handleSubmit}>
-
-                    <div className="mb-3">
-
-                        <label>Name</label>
-
-                        <input  type="text"   name="name" className="form-control" value={formData.name} onChange={handleChange}  required
-                        />
-                    </div>
-
-                    <div className="mb-3">
-
-                        <label>Email</label>
-
-                        <input type="email"  name="email"  className="form-control" value={formData.email} onChange={handleChange} required />
-                    </div>
-
-                    <div className="mb-3">
-
-                        <label>Password</label>
-
-                        <input type="password" name="password" className="form-control" value={formData.password}  onChange={handleChange}  required />
-                    </div>
-
-                    <div className="mb-3">
-
-                        <label>Phone No</label>
-
-                        <input  type="tel"  name="phone" className="form-control"  value={formData.phone}  onChange={handleChange}  required/>
-                    </div>
-
-                    <div className="mb-3">
-
-                       <label className="me-3">
-                            Gender:
-                        </label>
-
-                        <input type="radio" name="gender" value="Male" checked={formData.gender === "Male"}  onChange={handleChange} required/>
-
-                        <label className="me-3 ms-1">
-                            Male
-                        </label>
-
-                        <input
-                            type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} />
-
-                        <label className="ms-1">
-                            Female
-                        </label>
-                    </div>
-
-                    <div className="mb-3">
-
-                        <input  type="checkbox" name="checkbox" checked={formData.checkbox}  onChange={handleChange} required/>
-
-                        <label className="ms-2">
-                            Accept Terms
-                        </label>
-                    </div>
-
-                    <div className="mb-3">
-
-                        <label>Select Course</label>
-
-                        <select
-                            name="selection"
-                            className="form-select"
-                            value={formData.selection}
-                            onChange={handleChange}  required >
-                            <option value="">Select</option>
-                            <option value="React">React</option>
-                            <option value="JavaScript">JavaScript</option>
-                            <option value="Bootstrap">Bootstrap</option>
-                        </select>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-100"
-                    >
-                        {editData != null ? "Update" : "Save"}
-                    </button>
-
-                </form>
-            </div>
-
-            <div className="mt-5 bg-white rounded shadow p-4">
-
-                <h3 className="mb-4">
-                    Saved Data
-                </h3>
-
-                <table className="table table-bordered text-center">
-
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Gender</th>
-                            <th>Course</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {
-                         currentData.map((el,i) => (
-                                <tr key={el}>
-                                    <td>{el.name}</td>
-                                    <td>{el.email}</td>
-                                    <td>{el.phone}</td>
-                                    <td>{el.gender}</td>
-                                    <td>{el.selection}</td>
-
-                                    <td>
-    <button  className="btn btn-danger btn-sm" onClick={() => Delete(firstIndex + i)} > Delete </button>
-
-    <button className="btn btn-warning btn-sm ms-2" onClick={() => Edit(firstIndex + i)} > Edit </button>
-         </td>
-     </tr>
-  ))
-     }
- </tbody>
- </table>
-  <div className="d-flex justify-content-center align-items-center mt-3">
-
- <button className="btn btn-secondary" disabled={currentPage === 1}  onClick={() => setCurrentPage(currentPage - 1)} >Prev</button>
-<span className="mx-3">
-   Page {currentPage} of {totalPages || 1}
- </span>
-
-                    <button
-                        className="btn btn-secondary"
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        Next
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
+  const filteredData = savedData
+    .filter(
+      (el) =>
+        el.name.toLowerCase().includes(search.toLowerCase()) ||
+        el.email.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) =>
+      sortOrder === "asc"
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
     );
+
+  const lastIndex = currentPage * recordsPerPage;
+  const firstIndex = lastIndex - recordsPerPage;
+
+  const currentData = filteredData.slice(firstIndex, lastIndex);
+
+  const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+  return (
+    <div className="container mt-5">
+      <div className="card p-4 shadow">
+        <h2 className="text-center mb-4">Registration Form</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label>Name</label>
+            <input
+              type="text" name="name" className="form-control" value={formData.name}  onChange={handleChange} required />
+          </div>
+
+          <div className="mb-3">
+            <label>Email</label>
+            <input
+              type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required/>
+          </div>
+
+          <div className="mb-3">
+            <label>Password</label>
+            <input  type="password" name="password"className="form-control" value={formData.password}onChange={handleChange} required />
+          </div>
+
+          <div className="mb-3">
+            <label>Phone No</label>
+            <input
+              type="tel" name="phone" className="form-control"value={formData.phone}onChange={handleChange} required />
+          </div>
+
+          <div className="mb-3">
+            <label className="me-3">Gender:</label>
+
+            <input
+              type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} required />
+            <label className="ms-1 me-3">Male</label>
+
+            <input
+              type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} />
+            <label className="ms-1">Female</label>
+          </div>
+
+          <div className="mb-3">
+            <input type="checkbox" name="checkbox"checked={formData.checkbox}onChange={handleChange} required />
+            <label className="ms-2">Accept Terms</label>
+          </div>
+
+          <div className="mb-3">
+            <label>Select Course</label>
+
+            <select  name="selection"className="form-select" value={formData.selection} onChange={handleChange} required >
+              <option value="">Select</option>
+              <option value="React">React</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Bootstrap">Bootstrap</option>
+            </select>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100">
+            {editData !== null ? "Update" : "Save"}
+          </button>
+        </form>
+      </div>
+
+      <div className="mt-5 bg-white rounded shadow p-4">
+        <h3 className="mb-4">Saved Data</h3>
+
+        <div className="row mb-3">
+          <div className="col-md-6">
+            <input type="text" className="form-control" placeholder="Search by Name or Email" value={search} onChange={(e) => {  setSearch(e.target.value)
+             setCurrentPage(1) }} />
+          </div>
+
+          <div className="col-md-3">
+            <select
+              className="form-select"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="asc">Name A-Z</option>
+              <option value="desc">Name Z-A</option>
+            </select>
+          </div>
+        </div>
+
+        <table className="table table-bordered text-center">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Gender</th>
+              <th>Course</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((el, i) => (
+                <tr key={firstIndex + i}>
+                  <td>{el.name}</td>
+                  <td>{el.email}</td>
+                  <td>{el.phone}</td>
+                  <td>{el.gender}</td>
+                  <td>{el.selection}</td>
+
+                  <td>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => Delete(firstIndex + i)}
+                    >
+                      Delete
+                    </button>
+
+                    <button
+                      className="btn btn-warning btn-sm ms-2"
+                      onClick={() => Edit(firstIndex + i)}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+               
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <div className="d-flex justify-content-center align-items-center mt-3">
+          <button
+            className="btn btn-secondary" disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)} >
+            Prev
+          </button>
+
+          <span className="mx-3">
+            Page {currentPage} of {totalPages || 1}
+          </span>
+
+          <button
+            className="btn btn-secondary"
+            disabled={
+              currentPage === totalPages || totalPages === 0
+            }
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
